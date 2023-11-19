@@ -64,6 +64,13 @@ class createMylistParam(BaseModel):
             raise ValueError("type of value for topic dict is not list")
         return dictvalue
 
+#　マイリスト更新リクエストパラメータ
+class updateMyListParam(BaseModel):
+    my_list_id: int
+    title: str = Field(..., min_length=1, max_length=30, description="マイリストのタイトル")
+    theme_type: str = Field(..., min_length=3, max_length=3, description="マイリストのサムネイルイラストコード")
+    is_private: bool = Field(..., description="非公開フラグ")
+
 #　マイリストタイトル更新リクエストパラメータ
 class updateTitleParam(BaseModel):
     title: str = Field(..., min_length=1, max_length=30, description="マイリストのタイトル")

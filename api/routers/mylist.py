@@ -25,6 +25,16 @@ async def createUserThenMyList(body: mylistSchema.createUserThenMylistParam, db:
 async def createMyList(body: mylistSchema.createMylistParam, db: AsyncSession = Depends(get_db)):
     return await mylist_crud.createNewList(db, body)
 
+# マイリスト更新
+@router.post("/mylist/update", response_model=mylistSchema.createMylistResponse)
+async def updateMyList(body: mylistSchema.updateMyListParam, db: AsyncSession = Depends(get_db)):
+    mylist_id = body.my_list_id
+    listInDb = await mylist_crud.getMylistById(db, mylist_id=mylist_id)
+    if listInDb is None: 
+        logger.error(f"Mylist with id {mylist_id} not found")
+        raise HTTPException(status_code=404, detail=f"Mylist with id {mylist_id} not found")
+    return await mylist_crud.updateMyList(db, body, original=listInDb)
+
 # タイトル更新
 @router.put("/mylist/title/{mylist_id}", response_model=mylistSchema.createMylistResponse)
 async def updateTitle(mylist_id: int, body: mylistSchema.updateTitleParam, db: AsyncSession = Depends(get_db)):
@@ -32,7 +42,7 @@ async def updateTitle(mylist_id: int, body: mylistSchema.updateTitleParam, db: A
     if listInDb is None: 
         logger.error(f"Mylist with id {mylist_id} not found")
         raise HTTPException(status_code=404, detail=f"Mylist with id {mylist_id} not found")
-    return await mylist_crud.updateMyList(db, body, original=listInDb, target=UpdateTargetType.TITLE)
+    return await mylist_crud.updateMyListWithTarget(db, body, original=listInDb, target=UpdateTargetType.TITLE)
 
 # テーマ更新
 @router.put("/mylist/theme/{mylist_id}", response_model=mylistSchema.createMylistResponse)
@@ -41,7 +51,7 @@ async def updateTheme(mylist_id: int, body: mylistSchema.updateThemeParam, db: A
     if listInDb is None: 
         logger.error(f"Mylist with id {mylist_id} not found")
         raise HTTPException(status_code=404, detail=f"Mylist with id {mylist_id} not found")
-    return await mylist_crud.updateMyList(db, body, original=listInDb, target=UpdateTargetType.THEME)
+    return await mylist_crud.updateMyListWithTarget(db, body, original=listInDb, target=UpdateTargetType.THEME)
 
 # トピック更新
 @router.put("/mylist/topic/{mylist_id}", response_model=mylistSchema.createMylistResponse)
@@ -50,7 +60,7 @@ async def updateTopic(mylist_id: int, body: mylistSchema.updateTopicParam, db: A
     if listInDb is None: 
         logger.error(f"Mylist with id {mylist_id} not found")
         raise HTTPException(status_code=404, detail=f"Mylist with id {mylist_id} not found")
-    return await mylist_crud.updateMyList(db, body, original=listInDb, target=UpdateTargetType.TOPIC)
+    return await mylist_crud.updateMyListWithTarget(db, body, original=listInDb, target=UpdateTargetType.TOPIC)
 
 # 非公開フラグ更新
 @router.put("/mylist/privateflag/{mylist_id}", response_model=mylistSchema.createMylistResponse)
@@ -59,7 +69,7 @@ async def updatePravateFlag(mylist_id: int, body: mylistSchema.updatePrivateFlag
     if listInDb is None: 
         logger.error(f"Mylist with id {mylist_id} not found")
         raise HTTPException(status_code=404, detail=f"Mylist with id {mylist_id} not found")
-    return await mylist_crud.updateMyList(db, body, original=listInDb, target=UpdateTargetType.PRIVATE_FLAG)
+    return await mylist_crud.updateMyListWithTarget(db, body, original=listInDb, target=UpdateTargetType.PRIVATE_FLAG)
 
 # マイリスト削除
 @router.delete("/mylist/{mylist_id}", response_model=None)

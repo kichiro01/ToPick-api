@@ -58,7 +58,17 @@ async def getMylistById(db: AsyncSession, mylist_id: int) -> Optional[mylist_mod
     mylist: Optional[Tuple[mylist_model.MyList]] = result.first()
     return mylist[0] if mylist is not None else None  # 要素が一つであってもtupleで返却されるので１つ目の要素を取り出す
 
-async def updateMyList(db: AsyncSession, body: any, original: mylist_model.MyList, target: UpdateTargetType) -> mylist_model.MyList:
+async def updateMyList(db: AsyncSession, body: any, original: mylist_model.MyList) -> mylist_model.MyList:
+    original.title = body.title
+    original.theme_type = body.theme_type
+    original.is_private = body.is_private
+    db.add(original)
+    await db.commit()
+    await db.refresh(original)
+    return original
+
+
+async def updateMyListWithTarget(db: AsyncSession, body: any, original: mylist_model.MyList, target: UpdateTargetType) -> mylist_model.MyList:
     if target == UpdateTargetType.TITLE:
         original.title = body.title
     elif target == UpdateTargetType.THEME:
