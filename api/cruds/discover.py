@@ -17,6 +17,6 @@ async def retrieveAllPublicMyList(db: AsyncSession) -> List[Tuple[int, str, str,
             mylist_model.MyList.theme_type,
             mylist_model.MyList.topic,
             mylist_model.MyList.is_private
-        )
+        ).filter(mylist_model.MyList.is_private == False)
     )
     return result.all()
