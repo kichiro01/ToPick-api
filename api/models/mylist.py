@@ -14,6 +14,9 @@ class MyList(Base):
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, onupdate=datetime.datetime.now, nullable=False)
 
+    def getTopic(self):
+        return self.topic['topic']
+
 
     
 

@@ -7,12 +7,14 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-fastapi = "^0.85.1"
+fastapi = "^0.100.0"
 uvicorn = {extras = ["standard"], version = "^0.18.3"}
 passlib = "^1.7.4"
 python-multipart = "^0.0.5"
 sqlalchemy = "^1.4.42"
 aiomysql = "^0.1.1"
+fastapi-mail = "^1.4.1"
+python-dotenv = "^1.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
