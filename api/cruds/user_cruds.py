@@ -1,16 +1,16 @@
 import logging
-import api.cruds.common as common
+from api.cruds import common_cruds
 from sqlalchemy.ext.asyncio import AsyncSession
 
-import api.schemas.user as user_schema
-import api.models.user as user_model
+from api.schemas import user_schema
+from api.models import user_model
 
 logger = logging.getLogger('uvicorn')
 
 async def createUser(db: AsyncSession) -> user_schema.createUserResponse:
     # 新規ユーザー作成
     newUser = user_model.User()
-    common.setCreateDate(newUser)
+    common_cruds.setCreateDate(newUser)
     db.add(newUser)
     await db.commit()
     await db.refresh(newUser)

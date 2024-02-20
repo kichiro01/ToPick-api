@@ -8,9 +8,9 @@ class MyList(Base):
     user_id = Column(Integer, ForeignKey('m_user.user_id'), nullable=False) 
     title = Column(String(30))
     theme_type = Column(String(3))
-    # topic = Column(String(8500))
     topic = Column(JSON())
     is_private = Column(Boolean, default=False)
+    reported_flag = Column(Boolean, default=False)
     created_at = Column(DateTime, nullable=False)
     updated_at = Column(DateTime, onupdate=datetime.datetime.now, nullable=False)
 

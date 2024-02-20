@@ -1,8 +1,8 @@
 from sqlalchemy import create_engine
-from api.models.user import Base as Base4User
-from api.models.mylist import Base as Base4Mylist
-from api.models.auth import Base as Base4Auth
-from api.models.theme import Base as Base4Theme
+from api.models.user_model import Base as Base4User
+from api.models.mylist_model import Base as Base4Mylist
+from api.models.auth_model import Base as Base4Auth
+from api.models.theme_model import Base as Base4Theme
 
 DB_URL = "mysql+pymysql://root@db:3306/topickdb?charset=utf8mb4"
 engine = create_engine(DB_URL, echo=True)

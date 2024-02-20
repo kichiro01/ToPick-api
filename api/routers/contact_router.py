@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, Depends
 from api.db import get_db
-from api.schemas.contact import contactRequestParam, reoprtRequestParam
+from api.schemas.contact_schema import contactRequestParam, reoprtRequestParam
 from api.utils.mail_utils import MailUtils
 from sqlalchemy.ext.asyncio import AsyncSession
 

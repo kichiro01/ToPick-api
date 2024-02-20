@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import Column, Integer, String, ForeignKey, Boolean, JSON, DateTime
+from sqlalchemy import Column, Integer, String, JSON, DateTime
 from api.db import Base
 
 class PreparedTheme(Base):

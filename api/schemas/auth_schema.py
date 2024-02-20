@@ -1,5 +1,4 @@
-from typing import List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 # 認証コード発行リクエストパラメータ
 class createAuthCodeParam(BaseModel):
@@ -10,8 +9,8 @@ class Auth(BaseModel):
     auth_id: int
     auth_code: str = Field(..., min_length=6, max_length=6, description="認証コード")
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes = True)
+        
 
 # 認証リクエストパラメータ
 class authenticateParam(Auth):

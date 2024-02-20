@@ -1,7 +1,6 @@
 from datetime import datetime
-from typing import List, Optional, Union
-from xmlrpc.client import boolean
-from pydantic import BaseModel, Field, validator
+from typing import Optional, Union
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 # デフォルトテーマ取得レスポンス
 class PreparedTheme(BaseModel):
@@ -12,7 +11,7 @@ class PreparedTheme(BaseModel):
     image_type: str = Field(..., min_length=3, max_length=3, description="テーマのサムネイル画像コード")
     topic: dict = Field(..., description="トピックのリスト")
     
-    @validator("topic")
+    @field_validator("topic")
     def check_topic_format(cls, dictvalue: dict)-> Union[str, ValueError]:
         if dictvalue is None:
             raise ValueError("topic dict should not be None")
@@ -22,12 +21,10 @@ class PreparedTheme(BaseModel):
             raise ValueError("type of value for topic dict is not list")
         return dictvalue
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes = True)
 
 # 最終更新日取得レスポンス
 class LastUpdatedDate(BaseModel):
     updated_at: datetime = Field(..., description="最終更新日時")
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes = True)

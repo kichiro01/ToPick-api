@@ -1,6 +1,5 @@
-from typing import List, Optional, Union
-from xmlrpc.client import boolean
-from pydantic import BaseModel, Field, validator
+from typing import Optional, Union
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 # 全マイリスト取得リクエストパラメータ
@@ -15,7 +14,7 @@ class Mylist(BaseModel):
     topic: dict = Field(..., description="トピックのリスト") 
     is_private: bool = Field(..., description="非公開フラグ")
 
-    @validator("topic")
+    @field_validator("topic")
     def check_topic_format(cls, dictvalue: dict)-> Union[str, ValueError]:
         if dictvalue is None:
             raise ValueError("topic dict should not be None")
@@ -25,8 +24,7 @@ class Mylist(BaseModel):
             raise ValueError("type of value for topic dict is not list")
         return dictvalue
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes = True)
 
 # 初回マイリスト作成リクエストパラメータ
 class createUserThenMylistParam(BaseModel):
@@ -35,7 +33,7 @@ class createUserThenMylistParam(BaseModel):
     topic: Optional[dict] = Field({"topic" : []}, description="トピックのリスト") #topicがない場合は空の配列で保存する
     is_private: Optional[bool] = Field(False, description="非公開フラグ")
 
-    @validator("topic")
+    @field_validator("topic")
     def check_topic_format(cls, dictvalue: dict)-> Union[str, ValueError]:
         if dictvalue is None:
             raise ValueError("topic dict should not be None")
@@ -54,7 +52,7 @@ class createMylistParam(BaseModel):
     topic: Optional[dict] = Field({"topic" : []}, description="トピックのリスト") #topicがない場合は空の配列で保存する
     is_private: Optional[bool] = Field(False, description="非公開フラグ")
 
-    @validator("topic")
+    @field_validator("topic")
     def check_topic_format(cls, dictvalue: dict)-> Union[str, ValueError]:
         if dictvalue is None:
             raise ValueError("topic dict should not be None")
@@ -83,7 +81,7 @@ class updateThemeParam(BaseModel):
 class updateTopicParam(BaseModel):  
     topic: dict = Field(..., description="トピックのリスト")
 
-    @validator("topic")
+    @field_validator("topic")
     def check_topic_format(cls, dictvalue: dict)-> Union[str, ValueError]:
         if dictvalue is not None and 'topic' not in dictvalue:
             raise ValueError("topic dict should have a key with name 'topic'")
@@ -102,6 +100,10 @@ class createUserThenMylistResponse(Mylist):
 # マイリスト作成レスポンス
 class createMylistResponse(Mylist):
     pass
+
+# 通報フラグ更新レスポンス
+class updateReportedFlagResponse(Mylist):
+    reported_flag: bool
 
 
 

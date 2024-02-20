@@ -2,9 +2,9 @@ import logging
 import random, string
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from api.cruds.common import setCreateDate
-import api.schemas.auth as auth_schema
-import api.models.auth as auth_model
+from api.cruds.common_cruds import setCreateDate
+from api.schemas import auth_schema
+from api.models import auth_model
 from datetime import datetime, timedelta
 from fastapi import HTTPException
 
@@ -13,7 +13,7 @@ logger = logging.getLogger('uvicorn')
 # 認証コードを発行
 async def createAuthCode(db: AsyncSession, body: auth_schema.createAuthCodeParam) -> auth_schema.Auth:
     
-    newData = auth_model.Auth(**body.dict())
+    newData = auth_model.Auth(**body.model_dump())
     # 6文字のランダムな文字列を生成
     newCode = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
     newData.auth_code = newCode

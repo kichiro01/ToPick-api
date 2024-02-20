@@ -1,20 +1,22 @@
 import logging
 from typing import List, Tuple, Optional
-import api.cruds.common as common
+
+from fastapi import HTTPException
+from api.cruds import common_cruds
 from api.genericCode import UpdateTargetType
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.engine import Result
 
-import api.models.mylist as mylist_model
-import api.schemas.mylist as mylist_schema
-import api.models.user as user_model
+from api.models import mylist_model
+from api.schemas import mylist_schema
+from api.models import user_model
 
 logger = logging.getLogger('uvicorn')
 
 # 全マイリストを取得
 async def retrieveAllMyListsByUserId(db: AsyncSession, user_id: int) -> List[Tuple[int, str, str, dict, bool]]:
-    await common.checkIfUserExist(db, user_id)
+    await common_cruds.checkIfUserExist(db, user_id)
     result: Result = await db.execute(
         select(
             mylist_model.MyList.my_list_id,
@@ -29,23 +31,23 @@ async def retrieveAllMyListsByUserId(db: AsyncSession, user_id: int) -> List[Tup
 async def createUserAndNewList(db: AsyncSession, body: mylist_schema.createUserThenMylistParam) -> mylist_schema.createUserThenMylistResponse:
     # 新規ユーザー作成
     newUser = user_model.User()
-    common.setCreateDate(newUser)
+    common_cruds.setCreateDate(newUser)
     db.add(newUser)
     await db.commit()
     await db.refresh(newUser)
     # 作成したユーザーのIDでマイリスト作成
     newList = createNewListFromBody(body, newUser.user_id)
-    common.setCreateDate(newList)
+    common_cruds.setCreateDate(newList)
     db.add(newList)
     await db.commit()
     await db.refresh(newList)
     return newList
 
 async def createNewList(db: AsyncSession, body: mylist_schema.createMylistParam) -> mylist_model.MyList:
-    user_id = body.dict()["user_id"]
-    await common.checkIfUserExist(db, user_id)
-    newList = mylist_model.MyList(**body.dict())
-    common.setCreateDate(newList)
+    user_id = body.model_dump()["user_id"]
+    await common_cruds.checkIfUserExist(db, user_id)
+    newList = mylist_model.MyList(**body.model_dump())
+    common_cruds.setCreateDate(newList)
     db.add(newList)
     await db.commit()
     await db.refresh(newList)
@@ -89,10 +91,16 @@ async def deleteMylist(db: AsyncSession, original: mylist_model.MyList) -> None:
     await db.commit()
 
 def createNewListFromBody(body: mylist_schema.createUserThenMylistParam, user_id: int) -> mylist_model.MyList:
-    dict = body.dict()
+    dict = body.model_dump()
     # ユーザーIDがdictに含まれていない場合は登録
     dict.setdefault('user_id', user_id)
     newList = mylist_model.MyList(**dict)
     return newList
 
+async def getExistMyList(db: AsyncSession, mylist_id: int):
+    listInDb = await getMylistById(db, mylist_id=mylist_id)
+    if listInDb is None: 
+        logger.error(f"Mylist with id {mylist_id} not found")
+        raise HTTPException(status_code=404, detail=f"Mylist with id {mylist_id} not found")
+    return listInDb
 

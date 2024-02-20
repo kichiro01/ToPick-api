@@ -1,9 +1,9 @@
 import logging
 from api.codes.report_reasons import ReportReasons
-from api.cruds.mylist import getMylistById
+from api.cruds.mylist_cruds import getExistMyList
 from fastapi import HTTPException
 from fastapi_mail import ConnectionConfig, FastMail, MessageSchema
-from api.schemas.contact import contactRequestParam, reoprtRequestParam
+from api.schemas.contact_schema import contactRequestParam, reoprtRequestParam
 import config
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -65,10 +65,7 @@ class MailUtils:
     async def __createReportMessageBody(self, db: AsyncSession, requestBody: reoprtRequestParam):
         reasonCode = requestBody.reason_code
         myListId = requestBody.reported_mylist_id
-        listInDb = await getMylistById(db, myListId)
-        if listInDb is None: 
-            self.logger.error(f"Mylist with id {myListId} not found")
-            raise HTTPException(status_code=404, detail=f"Mylist with id {myListId} not found")
+        listInDb = await getExistMyList(db, myListId)
         topic = ''.join(['　　' + s + '<br>' for s in listInDb.getTopic()])
 
         return f"<p>【ユーザーID】<br>　{requestBody.user_id}</p>\

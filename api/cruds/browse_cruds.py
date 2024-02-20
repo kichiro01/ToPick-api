@@ -5,10 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.engine import Result
 from sqlalchemy.sql import text 
-from sqlalchemy.sql import func
-
-import api.models.theme as theme_model
-from api.schemas.theme import LastUpdatedDate
+from api.models import theme_model
 
 logger = logging.getLogger('uvicorn')
 

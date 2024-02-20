@@ -1,7 +1,7 @@
 import datetime
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
-import api.models.user as user_model
+from api.models import user_model
 
 def setCreateDate(model):
     now = datetime.datetime.now()
