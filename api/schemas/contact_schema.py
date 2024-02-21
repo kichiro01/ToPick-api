@@ -9,5 +9,5 @@ class contactRequestParam(BaseModel):
 class reoprtRequestParam(BaseModel):
     user_id: int
     reported_mylist_id: int
-    reason_code: str = Field(..., min_length=3, max_length=3, description="通報理由コード")
-    report_content: str = Field(..., min_length=1, max_length=100, description="通報内容詳細")
+    reason_code: list[str] = Field(..., description="通報理由コード")
+    report_content: str = Field(..., max_length=100, description="通報内容詳細")

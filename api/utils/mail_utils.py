@@ -63,13 +63,14 @@ class MailUtils:
     
 
     async def __createReportMessageBody(self, db: AsyncSession, requestBody: reoprtRequestParam):
-        reasonCode = requestBody.reason_code
+        reason_title_array = [ReportReasons.getTitleFromCode(code) for code in requestBody.reason_code]
+        reasons = ''.join(['　' + s + '<br>' for s in reason_title_array])
         myListId = requestBody.reported_mylist_id
         listInDb = await getExistMyList(db, myListId)
         topic = ''.join(['　　' + s + '<br>' for s in listInDb.getTopic()])
 
         return f"<p>【ユーザーID】<br>　{requestBody.user_id}</p>\
-            <p>【通報理由】<br>　{ReportReasons.getTitleFromCode(reasonCode)}</p>\
+            <p>【通報理由】<br>{reasons}</p>\
             <p>【通報内容】<br>　{requestBody.report_content}</p>\
             <p>【通報対象のマイリスト】<br>\
             　作成者ID：{listInDb.user_id}<br>\
