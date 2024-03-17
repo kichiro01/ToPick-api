@@ -28,19 +28,15 @@ async def authenticate(db: AsyncSession, body: auth_schema.authenticateParam) ->
     authInDb = await db.get(auth_model.Auth, body.auth_id)
     if not authInDb:
         logger.error(f"Auth with id {body.auth_id} not found")
-        raise HTTPException(status_code=404, detail=f"Auth with id {body.auth_id} not found")
+        raise HTTPException(status_code=404, detail=f"データ移行ID「{body.auth_id}」が見つかりません。")
     elif authInDb.auth_code != body.auth_code:
         # 認証コードが誤っている場合
         logger.error(f"Wrong auth_code for Auth with id {body.auth_id}")
-        raise HTTPException(status_code=401, detail=f"Wrong auth_code for Auth with id {body.auth_id}")
-    elif (authInDb.created_at + timedelta(days=30)) < datetime.now():
-        # 作成日から30日経過していた場合、認証期限切れ（レコードの削除は定期実行）
-        logger.error(f"Auth with id {body.auth_id} has expired")
-        raise HTTPException(status_code=401, detail=f"Auth with id {body.auth_id} has expired")
+        raise HTTPException(status_code=401, detail="認証コードが間違っています。")
     elif authInDb.is_authenticated:
         # 認証済の場合、再認証は不可
         logger.error(f"Auth with id {body.auth_id} has already been used")
-        raise HTTPException(status_code=401, detail=f"Auth with id {body.auth_id} has already been used")
+        raise HTTPException(status_code=401, detail=f"データ移行ID「{body.auth_id}」のデータは別の端末で既に復元済みです。")
     else:
         # 上記全てに当てはまらない場合のみ、認証済フラグを立て、userIdを返却する。
         authInDb.is_authenticated = True
@@ -48,8 +44,6 @@ async def authenticate(db: AsyncSession, body: auth_schema.authenticateParam) ->
         await db.commit()
         await db.refresh(authInDb)
         return auth_schema.authenticateResponse(user_id=authInDb.user_id)
-    # TODO 更新日三日経過後のデータや認証済みのデータは定期削除を検討。何らかの理由でデータ移行失敗した時用の問い合わせ動線も必要。
-
 
 async def checkUser(db: AsyncSession, user_id: int):
     # ユーザーに対して有効な認証データ(※)がDB上に存在する場合、新規に認証コードを発行することはできない。
