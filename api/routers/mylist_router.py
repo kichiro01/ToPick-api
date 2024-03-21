@@ -61,3 +61,8 @@ async def updatePravateFlag(mylist_id: int, body: mylist_schema.updatePrivateFla
 async def deleteMylist(mylist_id: int, db: AsyncSession = Depends(get_db)):
     listInDb = await mylist_cruds.getExistMyList(db, mylist_id=mylist_id)
     return await mylist_cruds.deleteMylist(db, original=listInDb)
+
+# Realmデータからマイリスト作成
+@router.post("/mylist/create/from-realm", response_model=mylist_schema.createMylistFromRealmResponse)
+async def createMyList(body: List[mylist_schema.createMylistFromRealmParam], db: AsyncSession = Depends(get_db)):
+    return await mylist_cruds.registerCreatedList(db, body)

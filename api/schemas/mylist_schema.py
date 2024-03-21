@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional, Union
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -93,6 +94,22 @@ class updateTopicParam(BaseModel):
 class updatePrivateFlagParam(BaseModel):  
     is_private: bool
 
+# Realmデータからマイリスト作成リクエストパラメータ（リスト）の各要素
+class createMylistFromRealmParam(BaseModel):
+    title: str = Field(..., min_length=1, max_length=30, description="マイリストのタイトル")
+    topic: dict = Field(..., description="トピックのリスト")
+    created_at: datetime = Field(..., description="クライアント側での作成日時")
+
+    @field_validator("topic")
+    def check_topic_format(cls, dictvalue: dict)-> Union[str, ValueError]:
+        if dictvalue is None:
+            raise ValueError("topic dict should not be None")
+        elif 'topic' not in dictvalue:
+            raise ValueError("topic dict should have a key with name 'topic'")
+        elif type(dictvalue["topic"]) is not list:
+            raise ValueError("type of value for topic dict is not list")
+        return dictvalue
+
 # 初回マイリスト作成レスポンス
 class createUserThenMylistResponse(Mylist):
     user_id: int
@@ -106,5 +123,8 @@ class updateReportedFlagResponse(Mylist):
     reported_flag: bool
 
 
-
+# Realmデータからマイリスト作成レスポンス    
+class createMylistFromRealmResponse(BaseModel):
+    user_id: int
+    mylists: list[Mylist]
     

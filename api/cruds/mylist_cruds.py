@@ -1,3 +1,4 @@
+import datetime
 import logging
 from typing import List, Tuple, Optional
 
@@ -7,10 +8,12 @@ from api.genericCode import UpdateTargetType
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.engine import Result
+from sqlalchemy.sql.expression import insert
 
 from api.models import mylist_model
 from api.schemas import mylist_schema
 from api.models import user_model
+from api.cruds import user_cruds
 
 logger = logging.getLogger('uvicorn')
 
@@ -30,11 +33,7 @@ async def retrieveAllMyListsByUserId(db: AsyncSession, user_id: int) -> List[Tup
 
 async def createUserAndNewList(db: AsyncSession, body: mylist_schema.createUserThenMylistParam) -> mylist_schema.createUserThenMylistResponse:
     # 新規ユーザー作成
-    newUser = user_model.User()
-    common_cruds.setCreateDate(newUser)
-    db.add(newUser)
-    await db.commit()
-    await db.refresh(newUser)
+    newUser = await user_cruds.createUser(db)
     # 作成したユーザーのIDでマイリスト作成
     newList = createNewListFromBody(body, newUser.user_id)
     common_cruds.setCreateDate(newList)
@@ -89,6 +88,36 @@ async def updateMyListWithTarget(db: AsyncSession, body: any, original: mylist_m
 async def deleteMylist(db: AsyncSession, original: mylist_model.MyList) -> None:
     await db.delete(original)
     await db.commit()
+
+""" v2.0以前のアプリ（iOS）でクライアント側で作成・保存されていたマイリストをDBに保存する """
+async def registerCreatedList(db: AsyncSession, body: List[mylist_schema.createMylistFromRealmParam]) -> mylist_schema.createMylistFromRealmResponse:
+    # ユーザー作成
+    user = await user_cruds.createUser(db)
+    user_id = user.user_id
+    # 現在時刻取得
+    now = datetime.datetime.now()
+    db_items = []
+    # DB保存用のマイリストデータ作成
+    for myListParam in body:
+        # パラメータの値をセット
+        newList = mylist_model.MyList(**myListParam.model_dump())
+        # 作成したユーザーIDをセット
+        newList.user_id = user_id
+        # 非公開、theme_typeは001で作成
+        newList.theme_type = '001'
+        newList.is_private = True
+        newList.updated_at = now
+        # db登録対象に追加
+        db_items.append(newList)
+    db.add_all(db_items)
+    await db.commit()
+    # 保存した各オブジェクトをリフレッシュ
+    for item in db_items:
+            await db.refresh(item)
+    return mylist_schema.createMylistFromRealmResponse(
+        user_id=user_id,
+        mylists=db_items
+    )
 
 def createNewListFromBody(body: mylist_schema.createUserThenMylistParam, user_id: int) -> mylist_model.MyList:
     dict = body.model_dump()
