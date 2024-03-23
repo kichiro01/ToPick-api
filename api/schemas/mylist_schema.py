@@ -126,5 +126,5 @@ class updateReportedFlagResponse(Mylist):
 # Realmデータからマイリスト作成レスポンス    
 class createMylistFromRealmResponse(BaseModel):
     user_id: int
-    mylists: list[Mylist]
+    my_lists: list[Mylist]
     

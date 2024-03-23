@@ -116,7 +116,7 @@ async def registerCreatedList(db: AsyncSession, body: List[mylist_schema.createM
             await db.refresh(item)
     return mylist_schema.createMylistFromRealmResponse(
         user_id=user_id,
-        mylists=db_items
+        my_lists=db_items
     )
 
 def createNewListFromBody(body: mylist_schema.createUserThenMylistParam, user_id: int) -> mylist_model.MyList:
